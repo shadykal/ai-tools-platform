@@ -171,62 +171,122 @@ function selectLighting(): string {
   return lightingTypes[Math.floor(Math.random() * lightingTypes.length)];
 }
 
-// Generate a simple SVG preview based on prompt and style
+// Generate a beautiful SVG artwork based on prompt and style
 function generateSVGPreview(
   prompt: string,
   colors: string[],
   width: number,
   height: number
 ): string {
-  const shapes: string[] = [];
+  const hash = crypto.createHash('md5').update(prompt).digest('hex');
+  const parts: string[] = [];
+  
+  // SVG opening tag
+  parts.push(`<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">`);
+  
+  // Define gradients
+  parts.push(`
+    <defs>
+      <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style="stop-color:${colors[0]};stop-opacity:0.3" />
+        <stop offset="50%" style="stop-color:${colors[1]};stop-opacity:0.5" />
+        <stop offset="100%" style="stop-color:${colors[2]};stop-opacity:0.3" />
+      </linearGradient>
+      <radialGradient id="light-grad" cx="50%" cy="30%">
+        <stop offset="0%" style="stop-color:white;stop-opacity:0.4" />
+        <stop offset="100%" style="stop-color:white;stop-opacity:0.0" />
+      </radialGradient>
+      <filter id="glow">
+        <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+        <feMerge>
+          <feMergeNode in="coloredBlur"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+    </defs>
+  `);
   
   // Background
-  shapes.push(
-    `<rect width="${width}" height="${height}" fill="${colors[colors.length - 1]}"/>`
-  );
+  parts.push(`<rect width="${width}" height="${height}" fill="${colors[colors.length - 1]}"/>`);
+  parts.push(`<rect width="${width}" height="${height}" fill="url(#bg-grad)"/>`);
   
-  // Generate abstract shapes based on prompt hash
-  const hash = crypto.createHash('md5').update(prompt).digest('hex');
-  
-  for (let i = 0; i < 8; i++) {
-    const type = parseInt(hash.substring(i * 2, i * 2 + 2), 16) % 3;
-    const x = (parseInt(hash.substring(i * 2, i * 2 + 2), 16) % width);
-    const y = (parseInt(hash.substring(i * 2, i * 2 + 2), 16) % height);
-    const size = 30 + (parseInt(hash.substring(i * 2, i * 2 + 2), 16) % 100);
-    const color = colors[i % colors.length];
-    const opacity = 0.3 + (i % 7) * 0.1;
+  // Decorative elements based on mood/style
+  const elements = 12;
+  for (let i = 0; i < elements; i++) {
+    const hashOffset = i * 4;
+    const hashVal = parseInt(hash.substring(hashOffset, hashOffset + 4), 16);
     
-    if (type === 0) {
-      shapes.push(
-        `<circle cx="${x}" cy="${y}" r="${size}" fill="${color}" opacity="${opacity}"/>`
+    const x = (hashVal % width);
+    const yVal = parseInt(hash.substring(hashOffset + 4, hashOffset + 8), 16);
+    const y = (yVal % height);
+    
+    const sizeVal = parseInt(hash.substring(hashOffset + 8, hashOffset + 12), 16);
+    const size = 20 + (sizeVal % 120);
+    
+    const colorIdx = (i + parseInt(hash.substring(0, 2), 16)) % colors.length;
+    const color = colors[colorIdx];
+    
+    const opacity = 0.15 + (i % 10) * 0.08;
+    const blurAmount = 1 + (i % 3);
+    
+    const shapeType = (hashVal + i) % 4;
+    
+    if (shapeType === 0) {
+      // Circle with blur
+      parts.push(
+        `<circle cx="${x}" cy="${y}" r="${size/2}" fill="${color}" opacity="${opacity}" filter="url(#glow)" style="filter: blur(${blurAmount}px)"/>`
       );
-    } else if (type === 1) {
-      shapes.push(
-        `<rect x="${x}" y="${y}" width="${size}" height="${size}" fill="${color}" opacity="${opacity}" rx="${size / 4}"/>`
+    } else if (shapeType === 1) {
+      // Rectangle with rotation
+      const rotation = (hashVal % 360);
+      parts.push(
+        `<rect x="${x - size/2}" y="${y - size/2}" width="${size}" height="${size}" fill="${color}" opacity="${opacity}" transform="rotate(${rotation} ${x} ${y})" style="filter: blur(${blurAmount}px)"/>`
+      );
+    } else if (shapeType === 2) {
+      // Triangle
+      const points = `${x},${y - size/2} ${x + size/2},${y + size/2} ${x - size/2},${y + size/2}`;
+      parts.push(
+        `<polygon points="${points}" fill="${color}" opacity="${opacity}" style="filter: blur(${blurAmount}px)"/>`
       );
     } else {
-      const points = `${x},${y - size} ${x + size},${y + size} ${x - size},${y + size}`;
-      shapes.push(
-        `<polygon points="${points}" fill="${color}" opacity="${opacity}"/>`
+      // Star-like shape
+      const points = [];
+      for (let j = 0; j < 5; j++) {
+        const angle = (j * 4 * Math.PI) / 5;
+        const rx = x + (size / 2) * Math.cos(angle);
+        const ry = y + (size / 2) * Math.sin(angle);
+        points.push(`${rx},${ry}`);
+      }
+      parts.push(
+        `<polygon points="${points.join(' ')}" fill="${color}" opacity="${opacity}" style="filter: blur(${blurAmount}px)"/>`
       );
     }
   }
   
-  // Add gradient overlay
-  shapes.unshift(`
-    <defs>
-      <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" style="stop-color:${colors[0]};stop-opacity:0.2" />
-        <stop offset="100%" style="stop-color:${colors[colors.length - 1]};stop-opacity:0.2" />
-      </linearGradient>
-    </defs>
-  `);
+  // Light overlay
+  parts.push(`<circle cx="${width * 0.3}" cy="${height * 0.2}" r="${width * 0.4}" fill="url(#light-grad)"/>`);
   
-  shapes.push(
-    `<rect width="${width}" height="${height}" fill="url(#grad)"/>`
+  // Add some textured lines for depth
+  const lineCount = 4;
+  for (let i = 0; i < lineCount; i++) {
+    const hashVal = parseInt(hash.substring(i * 3, i * 3 + 3), 16);
+    const y1 = (height / lineCount) * i;
+    const y2 = (height / lineCount) * (i + 1);
+    const colorIdx = i % colors.length;
+    
+    parts.push(
+      `<line x1="0" y1="${y1}" x2="${width}" y2="${y2}" stroke="${colors[colorIdx]}" stroke-width="2" opacity="0.1"/>`
+    );
+  }
+  
+  // Add decorative border
+  parts.push(
+    `<rect x="0" y="0" width="${width}" height="${height}" fill="none" stroke="${colors[0]}" stroke-width="3" opacity="0.3"/>`
   );
   
-  return `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">${shapes.join('')}</svg>`;
+  parts.push('</svg>');
+  
+  return parts.join('\n');
 }
 
 export function generateImage(
