@@ -5,6 +5,8 @@ import ToolCard from '@/components/ToolCard';
 import { AI_TOOLS } from '@/types/tools';
 
 export default function Home() {
+  const completedTools = ['storyboard'];
+  
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950">
       <Header />
@@ -25,10 +27,24 @@ export default function Home() {
               </p>
             </div>
 
+            {/* Status Badge */}
+            <div className="mb-8 text-center">
+              <span className="inline-block bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-4 py-2 rounded-full text-sm font-semibold">
+                ✅ {completedTools.length} من {AI_TOOLS.length} أداة جاهزة
+              </span>
+            </div>
+
             {/* Tools Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {AI_TOOLS.map((tool) => (
-                <ToolCard key={tool.id} tool={tool} />
+                <div key={tool.id} className="relative">
+                  <ToolCard tool={tool} />
+                  {completedTools.includes(tool.id) && (
+                    <div className="absolute top-3 right-3 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                      جاهزة ✨
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
           </div>
@@ -79,6 +95,62 @@ export default function Home() {
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400">
                     {feature.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Latest Updates Section */}
+        <section id="updates" className="py-20 md:py-32 bg-white dark:bg-gray-950">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+                آخر التحديثات
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[
+                {
+                  date: 'اليوم',
+                  title: 'أداة السيناريو والقصة جاهزة 🎉',
+                  description: 'توليد سيناريوهات احترافية محليًا بدون API خارجية. جاهزة للاستخدام الفوري!',
+                  status: 'مكتملة',
+                },
+                {
+                  date: 'قريباً',
+                  title: 'توليد الصور من النصوص',
+                  description: 'تحويل الأوصاف النصية إلى صور عالية الجودة باستخدام نماذج متقدمة.',
+                  status: 'تحت التطوير',
+                },
+                {
+                  date: 'قريباً',
+                  title: 'تحويل النصوص إلى فيديوهات',
+                  description: 'إنشاء فيديوهات احترافية من النصوص والسيناريوهات.',
+                  status: 'تحت التطوير',
+                },
+              ].map((update, idx) => (
+                <div
+                  key={idx}
+                  className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-6 rounded-xl border border-blue-200 dark:border-blue-800 hover:shadow-lg transition"
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">{update.date}</span>
+                    <span className={`text-xs font-bold px-3 py-1 rounded-full ${
+                      update.status === 'مكتملة'
+                        ? 'bg-green-200 dark:bg-green-900/50 text-green-800 dark:text-green-300'
+                        : 'bg-yellow-200 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-300'
+                    }`}>
+                      {update.status}
+                    </span>
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                    {update.title}
+                  </h3>
+                  <p className="text-gray-700 dark:text-gray-300">
+                    {update.description}
                   </p>
                 </div>
               ))}
