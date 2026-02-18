@@ -383,28 +383,3 @@ export default function TextToImagePage() {
     </div>
   );
 }
-              </h3>
-              <ul className="space-y-4">
-                {[
-                  'دقة عالية جداً',
-                  'أنماط فنية متعددة',
-                  'تحكم دقيق بالتفاصيل',
-                  'معالجة سريعة',
-                  'خيارات تصدير متنوعة',
-                  'واجهة سهلة الاستخدام',
-                ].map((feature, idx) => (
-                  <div key={idx} className="flex items-start gap-3">
-                    <span className="text-xl">✓</span>
-                    <span className="text-gray-700 dark:text-gray-300">{feature}</span>
-                  </div>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      </main>
-
-      <Footer />
-    </div>
-  );
-}
