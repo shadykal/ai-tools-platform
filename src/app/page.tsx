@@ -5,7 +5,7 @@ import ToolCard from '@/components/ToolCard';
 import { AI_TOOLS } from '@/types/tools';
 
 export default function Home() {
-  const completedTools = ['storyboard'];
+  const completedTools = ['storyboard', 'text-to-image'];
   
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950">
